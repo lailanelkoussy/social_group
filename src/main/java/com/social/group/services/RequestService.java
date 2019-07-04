@@ -75,6 +75,7 @@ public class RequestService {
     }
 
     public boolean declineRequest(int request_id, int userId) {
+
         Optional<Request> requestOptional = requestRepository.findById(request_id);
         if (requestOptional.isPresent()) {
             Request request = requestOptional.get();
