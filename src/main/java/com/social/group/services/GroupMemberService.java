@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class GroupMemberService {
@@ -35,6 +36,14 @@ public class GroupMemberService {
 
     public GroupMember getGroupMember (int groupId, int userId){
         return groupMemberRepository.findByCompositeKey_GroupIdAndCompositeKey_UserId(groupId, userId);
+    }
+
+    public void addGroupMembers(Set<GroupMember> groupMembers){
+        groupMemberRepository.saveAll(groupMembers);
+    }
+
+    public void removeGroupMembers(Set<GroupMember> groupMembers){
+        groupMemberRepository.deleteAll(groupMembers);
     }
 
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -24,12 +25,10 @@ public class RequestService {
     public void sendRequest(int groupId, int userId) {
 
         if (!requestAlreadyExists(groupId, userId)) {
-            Request request = new Request();
 
             Group group = groupService.getGroup(groupId);
-            List<Request> requestList = group.getRequests();
-            request.setUserId(userId);
-            request.setGroup(group);
+            Set<Request> requestList = group.getRequests();
+            Request request = new Request(userId,group);
 
             requestList.add(request);
             requestRepository.save(request);
@@ -82,7 +81,7 @@ public class RequestService {
             Group group = request.getGroup();
 
             if (group.getCreatorId() == userId || request.getUserId() == userId) {
-                List<Request> requests = group.getRequests();
+                Set<Request> requests = group.getRequests();
                 requests.remove(request);
 
                 requestRepository.delete(request);

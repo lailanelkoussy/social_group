@@ -22,7 +22,6 @@ public class GroupController {
     RequestService requestService;
 
     //Groups
-
     @GetMapping
     public List<Group> getAllGroups() {
         return groupService.getAllGroups();
@@ -64,27 +63,24 @@ public class GroupController {
     }
 
     //Members
-
     @PatchMapping(value = "/{id}/members")
     public ResponseEntity<Object> addNewMembersToGroup(@PathVariable int id, @RequestBody List<Integer> userIds) {
         return new ResponseEntity<>(groupService.addNewMembersToGroup(id, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
-    @PatchMapping(value = "/{id}/members/remove")
-    public ResponseEntity<Object> removeMembersFromgroup(@PathVariable int id, int removerId, @RequestBody List<Integer> userIds) {
+    @PatchMapping(value = "/{id}/{removerId}/members/remove")
+    public ResponseEntity<Object> removeMembersFromgroup(@PathVariable int id, @PathVariable int removerId, @RequestBody List<Integer> userIds) {
         return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
-
     //Requests
-
     @GetMapping(value = "/{id}/requests")
     public List<Request> viewRequests(@PathVariable int id, @RequestBody int userId) {
         return requestService.viewRequests(id, userId);
     }
 
     @PatchMapping(value = "/request/{userId}/{requestId}/")
-    public ResponseEntity<Object> acceptRequest(@PathVariable int requestId, @RequestBody int userId) {
+    public ResponseEntity<Object> acceptRequest(@PathVariable int requestId, @PathVariable int userId) {
         return new ResponseEntity<>(requestService.acceptRequest(requestId, userId) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
@@ -99,10 +95,9 @@ public class GroupController {
         requestService.sendRequest(id, userId);
     }
 
-
     //User
-    @PatchMapping(value = "/user/{id}")
-    public void activateOrDeactivateGroupsOfUser(@PathVariable int userId, @RequestBody boolean activate) {
+    @PatchMapping(value = "/user/{id}/{activate}")
+    public void activateOrDeactivateGroupsOfUser(@PathVariable int userId, @PathVariable boolean activate) {
         groupService.activateOrDeactivateGroupsOfUser(userId, activate);
     }
 

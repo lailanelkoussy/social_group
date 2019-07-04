@@ -9,8 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -47,6 +49,17 @@ public class GroupService {
     public boolean addNewGroup(Group group) {
         if (noNameConflict(group.getName())) {
             groupRepository.save(group);
+            int groupId = groupRepository.save(group).getId();
+
+            GroupMember groupMember = new GroupMember();
+            GroupMemberCK groupMemberCK = new GroupMemberCK();
+            groupMemberCK.setUserId(group.getCreatorId());
+            groupMemberCK.setGroup(group);
+            groupMember.setCompositeKey(groupMemberCK);
+
+            List<Integer> creator= new ArrayList<>();
+            creator.add(group.getCreatorId());
+            addNewMembersToGroup(groupId, creator);
 
             return true;
 
@@ -86,7 +99,8 @@ public class GroupService {
 
         if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
-            List<GroupMember> groupMembers = group.getMembers();
+            Set<GroupMember> groupMembers = group.getMembers();
+
 
             for(int userId : userIds){
                 GroupMemberCK compositeKey = new GroupMemberCK();
@@ -98,6 +112,7 @@ public class GroupService {
                 groupMembers.add(groupMember);
             }
 
+            groupMemberService.addGroupMembers(groupMembers);
             group.setMembers(groupMembers);
             groupRepository.save(group);
 
@@ -116,7 +131,7 @@ public class GroupService {
         if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
             if (group.getCreatorId() == removerId) {
-                List<GroupMember> groupMembers = group.getMembers();
+                Set<GroupMember> groupMembers = group.getMembers();
 
 
                 for (int userId : userIds) {
@@ -125,6 +140,8 @@ public class GroupService {
                 }
                 group.setMembers(groupMembers);
                 groupRepository.save(group);
+
+                groupMemberService.removeGroupMembers(groupMembers);
 
                 return true;
             } else {

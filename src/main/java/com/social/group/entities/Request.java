@@ -1,13 +1,17 @@
 package com.social.group.entities;
 
-import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Data
 @Entity
 @NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "request")
 public class Request {
 
@@ -19,8 +23,14 @@ public class Request {
     @Column(name = "user_id")
     int userId;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "group_id")
     Group group;
+
+    public Request(int userId, Group group) {
+        this.userId = userId;
+        this.group = group;
+    }
 
 }

@@ -3,7 +3,9 @@ package com.social.group.entities;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -24,11 +26,17 @@ public class Group {
     boolean active;
 
     @OneToMany(mappedBy = "compositeKey.group")
-    List<GroupMember> members;
+    Set<GroupMember> members;
 
     @OneToMany(mappedBy = "group")
-    List<Request> requests;
+    Set<Request> requests;
 
-    //owner aka admin
+    {
+        members = new HashSet<>();
+        requests = new HashSet<>();
+    }
+
+
+
 
 }
