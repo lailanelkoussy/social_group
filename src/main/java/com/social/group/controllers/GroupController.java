@@ -69,7 +69,7 @@ public class GroupController {
     }
 
     @PatchMapping(value = "/{id}/{removerId}/members/remove")
-    public ResponseEntity<Object> removeMembersFromgroup(@PathVariable int id, @PathVariable int removerId, @RequestBody List<Integer> userIds) {
+    public ResponseEntity<Object> removeMembersFromGroup(@PathVariable int id, @PathVariable int removerId, @RequestBody List<Integer> userIds) {
         return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
@@ -85,7 +85,7 @@ public class GroupController {
     }
 
     @DeleteMapping(value = "/request/{userId}/{requestId}/")
-    public ResponseEntity<Object> declineRequest(@PathVariable int requestId, @RequestBody int userId) {
+    public ResponseEntity<Object> declineRequest(@PathVariable int requestId, @PathVariable int userId) {
         return new ResponseEntity<>(requestService.declineRequest(requestId, userId) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
 
     }

@@ -61,6 +61,8 @@ public class RequestService {
 
                 groupService.addNewMembersToGroup(group.getId(), userIdList);
 
+                requestRepository.deleteById(request_id);
+
                 return true;
 
             } else {
@@ -101,6 +103,10 @@ public class RequestService {
             log.error("Request to join not found");
             return false;
         }
+    }
+
+    public void deleteRequests(Set<Request> requests){
+        requestRepository.deleteAll(requests);
     }
 
     private boolean requestAlreadyExists(int groupId, int userId) {

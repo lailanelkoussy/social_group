@@ -3,6 +3,7 @@ package com.social.group.services;
 import com.social.group.entities.Group;
 import com.social.group.entities.GroupMember;
 import com.social.group.entities.GroupMemberCK;
+import com.social.group.entities.Request;
 import com.social.group.repos.GroupMemberRepository;
 import com.social.group.repos.GroupRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,9 @@ public class GroupService {
 
     @Autowired
     GroupMemberService groupMemberService;
+
+    @Autowired
+    RequestService requestService;
 
     public List<Group> getAllGroups() {
         return groupRepository.findAll();
@@ -57,7 +61,7 @@ public class GroupService {
             groupMemberCK.setGroup(group);
             groupMember.setCompositeKey(groupMemberCK);
 
-            List<Integer> creator= new ArrayList<>();
+            List<Integer> creator = new ArrayList<>();
             creator.add(group.getCreatorId());
             addNewMembersToGroup(groupId, creator);
 
@@ -75,13 +79,14 @@ public class GroupService {
         if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
             if (group.getCreatorId() == userId) {
+                Set<Request> requests = group.getRequests();
+                requestService.deleteRequests(requests);
                 groupRepository.delete(group);
                 return true;
             } else {
                 log.error("Not authorized to perform this action");
                 return false;
             }
-
 
         } else {
             log.error("Group not found");
@@ -102,7 +107,7 @@ public class GroupService {
             Set<GroupMember> groupMembers = group.getMembers();
 
 
-            for(int userId : userIds){
+            for (int userId : userIds) {
                 GroupMemberCK compositeKey = new GroupMemberCK();
                 compositeKey.setGroup(group);
                 compositeKey.setUserId(userId);
@@ -133,10 +138,14 @@ public class GroupService {
             if (group.getCreatorId() == removerId) {
                 Set<GroupMember> groupMembers = group.getMembers();
 
-
                 for (int userId : userIds) {
-                    GroupMember groupMember = groupMemberService.getGroupMember(groupId, userId);
-                    groupMembers.remove(groupMember);
+                    if (userId == group.getCreatorId()) {
+                        log.warn("You cannot remove creator from their group");
+
+                    } else {
+                        GroupMember groupMember = groupMemberService.getGroupMember(groupId, userId);
+                        groupMembers.remove(groupMember);
+                    }
                 }
                 group.setMembers(groupMembers);
                 groupRepository.save(group);
