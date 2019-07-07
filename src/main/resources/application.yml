@@ -7,6 +7,8 @@ spring:
     username: root
     password: mydatabase
     driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: GroupService
 
   jpa:
     hibernate:
@@ -15,3 +17,10 @@ spring:
     generate-ddl: true
     show-sql: true
 
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
