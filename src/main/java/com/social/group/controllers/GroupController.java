@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/groups")
-public class GroupController {
+public class GroupController { //todo separate to groups and requests controllers
 
     @Autowired
     GroupService groupService;
@@ -22,13 +22,13 @@ public class GroupController {
     RequestService requestService;
 
     //Groups
-    @GetMapping
+    @GetMapping//todo this is wrong, no one should have access like this!
     public List<Group> getAllGroups() {
         return groupService.getAllGroups();
     }
 
     @PostMapping
-    public ResponseEntity<Object> addNewGroup(@RequestBody Group group) {
+    public ResponseEntity<Object> addNewGroup(@RequestBody Group group) {//todo where is the validation?
         return new ResponseEntity<>(groupService.addNewGroup(group) ? HttpStatus.CREATED : HttpStatus.NOT_ACCEPTABLE);
     }
 
@@ -42,12 +42,12 @@ public class GroupController {
         return groupService.searchForGroups(query);
     }
 
-    @DeleteMapping(value = "/{groupId}/{userId}")
+    @DeleteMapping(value = "/{groupId}/{userId}") //todo endpoint should be changed
     public ResponseEntity<Object> deleteGroup(@PathVariable int groupId, @PathVariable int userId) {
         return new ResponseEntity<>(groupService.deleteGroup(groupId, userId) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = "/user/{id}/")
+    @GetMapping(value = "/user/{id}/")//todo rename
     public List<Group> getUserGroups(@PathVariable int id) {
         return groupService.getUserGroups(id);
     }

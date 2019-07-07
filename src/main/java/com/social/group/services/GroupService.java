@@ -32,7 +32,7 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
-    public Group getGroup(int groupId) {
+    public Group getGroup(int groupId) { //todo try to avoid this null
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         if (groupOptional.isPresent()) {
@@ -80,7 +80,7 @@ public class GroupService {
             Group group = groupOptional.get();
             if (group.getCreatorId() == userId) {
                 Set<Request> requests = group.getRequests();
-                requestService.deleteRequests(requests);
+                requestService.deleteRequests(requests);//todo what about those already in the group ?
                 groupRepository.delete(group);
                 return true;
             } else {
@@ -133,7 +133,7 @@ public class GroupService {
     public boolean removeGroupMembersFromGroup(int groupId, int removerId, List<Integer> userIds) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
-        if (groupOptional.isPresent()) {
+        if (groupOptional.isPresent()) {//todo exceptions shall be another good option
             Group group = groupOptional.get();
             if (group.getCreatorId() == removerId) {
                 Set<GroupMember> groupMembers = group.getMembers();
@@ -169,7 +169,7 @@ public class GroupService {
 
         if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
-            if (noNameConflict(group.getName())) {
+            if (noNameConflict(group.getName())) {//todo I think this is a bug ?
                 group.setName(newName);
                 groupRepository.save(group);
                 return true;

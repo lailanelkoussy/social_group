@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name = "request")
-public class Request {
+public class Request { //todo how do you know that a request was accepted/rejected ?
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

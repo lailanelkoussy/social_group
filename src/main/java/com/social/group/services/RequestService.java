@@ -43,12 +43,13 @@ public class RequestService {
         if (group.getCreatorId() == userId) {
             return requestRepository.findAllByGroupId(groupId);
 
-        } else return null;
+        } else return null; //todo try as much as you can not to return null, it's dangerous
+        //todo you can return 403 as a better response
 
 
     }
 
-    public boolean acceptRequest(int request_id, int userId) {
+    public boolean acceptRequest(int request_id, int userId) {//todo replace the response
         Optional<Request> requestOptional = requestRepository.findById(request_id);
 
         if (requestOptional.isPresent()) {
@@ -76,7 +77,7 @@ public class RequestService {
         }
     }
 
-    public boolean declineRequest(int request_id, int userId) {
+    public boolean declineRequest(int request_id, int userId) {//todo replace the response
 
         Optional<Request> requestOptional = requestRepository.findById(request_id);
         if (requestOptional.isPresent()) {

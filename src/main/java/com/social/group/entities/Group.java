@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name = "groupp")
+@Table(name = "group_")//todo rename this
 public class Group {
 
     @Id
