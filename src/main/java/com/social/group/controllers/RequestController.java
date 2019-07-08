@@ -28,7 +28,7 @@ public class RequestController {
             @ApiParam(value = "Id of group", required = true)
             @PathVariable int groupId,
             @ApiParam(value = "Id of user performing this request", required = true)
-            @RequestBody int userId) {
+            @RequestBody int userId) throws IllegalAccessException {
         return requestService.viewRequests(groupId, userId);
     }
 
@@ -41,7 +41,7 @@ public class RequestController {
             @ApiParam(value = "Id of request", required = true)
             @PathVariable int requestId,
             @ApiParam(value = "Id of user performing this request", required = true)
-            @PathVariable int userId) {
+            @PathVariable int userId) throws IllegalAccessException {
         return new ResponseEntity<>(requestService.acceptRequest(requestId, userId) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
@@ -54,7 +54,7 @@ public class RequestController {
             @ApiParam(value = "Id of request", required = true)
             @PathVariable int requestId,
             @ApiParam(value = "Id of user performing this request", required = true)
-            @PathVariable int userId) {
+            @PathVariable int userId) throws IllegalAccessException {
         return new ResponseEntity<>(requestService.declineRequest(requestId, userId) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
