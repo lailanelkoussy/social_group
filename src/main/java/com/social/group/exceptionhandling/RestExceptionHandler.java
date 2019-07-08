@@ -127,13 +127,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request WebRequest
      * @return the ApiError object
      */
-    @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ServletWebRequest servletWebRequest = (ServletWebRequest) request;
-        log.info("{} to {}", servletWebRequest.getHttpMethod(), servletWebRequest.getRequest().getServletPath());
-        String error = "Malformed JSON request";
-        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
-    }
+//    @Override
+//    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+//        ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+//        log.info("{} to {}", servletWebRequest.getHttpMethod(), servletWebRequest.getRequest().getServletPath());
+//        String error = "Malformed JSON request";
+//        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
+//    }
 
     /**
      * Handle HttpMessageNotWritableException.
@@ -185,7 +185,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IllegalAccessException.class)
     protected ResponseEntity<Object> handleIllegalAccessException(NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ApiError apiError = new ApiError(HttpStatus.NOT_ACCEPTABLE);
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN);
         apiError.setMessage("Authorization error");
         apiError.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiError);

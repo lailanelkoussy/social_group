@@ -43,7 +43,8 @@ public class GroupController {
     @ApiOperation(value = "Create new group")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully added object"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),})
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
+            @ApiResponse(code = 400, message = "Invalid group object")})
     public ResponseEntity<Object> addNewGroup(
             @ApiParam(value = "Group object to create", required = true) @RequestBody Group group) {
         return new ResponseEntity<>(groupService.addNewGroup(group) ? HttpStatus.CREATED : HttpStatus.NOT_ACCEPTABLE);
@@ -114,23 +115,30 @@ public class GroupController {
             @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int removerId,
             @ApiParam(value = "List of user ids of users to remove") @RequestBody List<Integer> userIds) throws IllegalAccessException {
         return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
-
     }
 
     //User
-
     @GetMapping(value = "/user/{id}/", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get a user's groups")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-
     public List<Group> getUserGroups(
             @ApiParam(value = "Id of user") @PathVariable int id) {
         return groupService.getUserGroups(id);
     }
 
-    @PatchMapping(value = "/user/{id}/{activate}")
+    @GetMapping(value = "/user/{id}/ids", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get a user's groups")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved list"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
+    public List<Integer> getUserGroupIds(
+            @ApiParam(value = "Id of user") @PathVariable int id) {
+        return groupService.getUserGroupIds(id);
+    }
+
+    @PatchMapping(value = "/user/{userId}/{activate}")
     @ApiOperation(value = "Activate or deactivate groups created by a user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully updated list"),

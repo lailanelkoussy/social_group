@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,20 +37,17 @@ public class RequestService {
         }
     }
 
-    public List<Request> viewRequests(int groupId, int userId) {
+    public List<Request> viewRequests(int groupId, int userId) throws IllegalAccessException {
 
         Group group = groupService.getGroup(groupId);
 
         if (group.getCreatorId() == userId) {
             return requestRepository.findAllByGroupId(groupId);
 
-        } else return null; //todo try as much as you can not to return null, it's dangerous
-        //todo you can return 403 as a better response
-
-
+        } else throw (new  IllegalAccessException("Not authorized to perform this action"));
     }
 
-    public boolean acceptRequest(int request_id, int userId) {//todo replace the response
+    public boolean acceptRequest(int request_id, int userId) throws IllegalAccessException {
         Optional<Request> requestOptional = requestRepository.findById(request_id);
 
         if (requestOptional.isPresent()) {
@@ -63,21 +61,20 @@ public class RequestService {
                 groupService.addNewMembersToGroup(group.getId(), userIdList);
 
                 requestRepository.deleteById(request_id);
-
                 return true;
 
             } else {
                 log.error("Not allowed to perform this action");
-                return false;
+                throw (new IllegalAccessException("Not authorized to perform this action"));
             }
 
         } else {
             log.error("Request to join not found");
-            return false;
+            throw (new EntityNotFoundException("Request to join not found"));
         }
     }
 
-    public boolean declineRequest(int request_id, int userId) {//todo replace the response
+    public boolean declineRequest(int request_id, int userId) throws IllegalAccessException {
 
         Optional<Request> requestOptional = requestRepository.findById(request_id);
         if (requestOptional.isPresent()) {
@@ -97,12 +94,12 @@ public class RequestService {
 
             } else {
                 log.error("Not allowed to perform this action");
-                return false;
+                throw (new IllegalAccessException("Not authorized to perform this action"));
             }
 
         } else {
             log.error("Request to join not found");
-            return false;
+            throw (new EntityNotFoundException("Request to join not found"));
         }
     }
 

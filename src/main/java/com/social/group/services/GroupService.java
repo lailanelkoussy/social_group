@@ -80,7 +80,7 @@ public class GroupService {
             Group group = groupOptional.get();
             if (group.getCreatorId() == userId) {
                 Set<Request> requests = group.getRequests();
-                requestService.deleteRequests(requests);//todo what about those already in the group ?
+                requestService.deleteRequests(requests);
                 groupMemberService.removeGroupMembers(group.getMembers());
                 groupRepository.delete(group);
                 return true;
@@ -131,7 +131,7 @@ public class GroupService {
     public boolean removeGroupMembersFromGroup(int groupId, int removerId, List<Integer> userIds) throws IllegalAccessException {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
-        if (groupOptional.isPresent()) {//todo exceptions shall be another good option
+        if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
             if (group.getCreatorId() == removerId) {
                 Set<GroupMember> groupMembers = group.getMembers();
@@ -158,7 +158,7 @@ public class GroupService {
 
         } else {
             log.error("Group not found");
-            return false;
+            throw( new EntityNotFoundException("Group not found"));
         }
     }
 
@@ -167,7 +167,7 @@ public class GroupService {
 
         if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
-            if (noNameConflict(group.getName())) {//todo I think this is a bug ?
+            if (noNameConflict(newName)) {
                 group.setName(newName);
                 groupRepository.save(group);
                 return true;
@@ -200,6 +200,16 @@ public class GroupService {
 
     public List<Group> getUserGroups(int userId) {
         return groupMemberService.getGroupsWithUser(userId);
+    }
+
+    public List<Integer> getUserGroupIds(int userId) {
+        List<Group> groups = getUserGroups(userId);
+        List<Integer> groupIds = new ArrayList<>();
+
+        for (Group group : groups) {
+            groupIds.add(group.getId());
+        }
+        return groupIds;
     }
 
     public void activateOrDeactivateGroupsOfUser(int user_id, boolean activate) {

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface GroupMemberRepository extends JpaRepository<GroupMember, Integer> {//todo this is wrong
+public interface GroupMemberRepository extends JpaRepository<GroupMember, Integer> {
 
     List<GroupMember> findAllByCompositeKey_GroupId(int compositeKey_GroupId);
 
