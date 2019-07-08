@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
-    public Group getGroup(int groupId) { //todo try to avoid this null
+    public Group getGroup(int groupId) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         if (groupOptional.isPresent()) {
@@ -40,7 +41,7 @@ public class GroupService {
 
         } else {
             log.error("Group not found");
-            return null;
+            throw (new EntityNotFoundException("Group not found"));
         }
 
     }
@@ -72,7 +73,7 @@ public class GroupService {
         }
     }
 
-    public boolean deleteGroup(int groupId, int userId) {
+    public boolean deleteGroup(int groupId, int userId) throws IllegalAccessException {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         if (groupOptional.isPresent()) {
@@ -80,18 +81,18 @@ public class GroupService {
             if (group.getCreatorId() == userId) {
                 Set<Request> requests = group.getRequests();
                 requestService.deleteRequests(requests);//todo what about those already in the group ?
+                groupMemberService.removeGroupMembers(group.getMembers());
                 groupRepository.delete(group);
                 return true;
             } else {
                 log.error("Not authorized to perform this action");
-                return false;
+                throw (new IllegalAccessException("Not authorized to perform this action"));
             }
 
         } else {
             log.error("Group not found");
-            return false;
+            throw (new EntityNotFoundException("Group not found"));
         }
-
     }
 
     public void updateGroup(Group group) {
@@ -104,7 +105,6 @@ public class GroupService {
         if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
             Set<GroupMember> groupMembers = group.getMembers();
-
 
             for (int userId : userIds) {
                 GroupMemberCK compositeKey = new GroupMemberCK();
@@ -120,7 +120,6 @@ public class GroupService {
             group.setMembers(groupMembers);
             groupRepository.save(group);
 
-
         } else {
             log.error("Group not found");
             return false;
@@ -129,7 +128,7 @@ public class GroupService {
         return true;
     }
 
-    public boolean removeGroupMembersFromGroup(int groupId, int removerId, List<Integer> userIds) {
+    public boolean removeGroupMembersFromGroup(int groupId, int removerId, List<Integer> userIds) throws IllegalAccessException {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         if (groupOptional.isPresent()) {//todo exceptions shall be another good option
@@ -154,7 +153,7 @@ public class GroupService {
                 return true;
             } else {
                 log.error("Not authorized to perform this action.");
-                return false;
+                throw (new IllegalAccessException("Not authorized to perform this action"));
             }
 
         } else {
@@ -194,7 +193,7 @@ public class GroupService {
 
         } else {
             log.error("Group not found");
-            return false;
+            throw (new EntityNotFoundException("Group not found"));
         }
 
     }

@@ -5,5 +5,5 @@ CREATE TABLE request
     user_id         int(11)     NOT NULL,
 
     PRIMARY KEY (request_id),
-    FOREIGN KEY (group_id) REFERENCES groupp(group_id)
+    FOREIGN KEY (group_id) REFERENCES group_(group_id)
 );

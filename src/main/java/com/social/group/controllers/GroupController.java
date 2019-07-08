@@ -66,7 +66,7 @@ public class GroupController {
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
     public ResponseEntity<Object> deleteGroup(
             @ApiParam(value = "Id of group", required = true) @PathVariable int groupId,
-            @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int userId) {
+            @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int userId) throws IllegalAccessException {
         return new ResponseEntity<>(groupService.deleteGroup(groupId, userId) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
@@ -112,8 +112,9 @@ public class GroupController {
     public ResponseEntity<Object> removeMembersFromGroup(
             @ApiParam(value = "Id of group", required = true) @PathVariable int id,
             @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int removerId,
-            @ApiParam(value = "List of user ids of users to remove") @RequestBody List<Integer> userIds) {
+            @ApiParam(value = "List of user ids of users to remove") @RequestBody List<Integer> userIds) throws IllegalAccessException {
         return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
+
     }
 
     //User
