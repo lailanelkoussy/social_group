@@ -4,7 +4,6 @@ import com.social.group.entities.Group;
 import com.social.group.entities.GroupMember;
 import com.social.group.entities.GroupMemberCK;
 import com.social.group.entities.Request;
-import com.social.group.repos.GroupMemberRepository;
 import com.social.group.repos.GroupRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

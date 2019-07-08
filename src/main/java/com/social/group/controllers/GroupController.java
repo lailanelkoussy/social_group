@@ -2,11 +2,7 @@ package com.social.group.controllers;
 
 import com.social.group.entities.Group;
 import com.social.group.services.GroupService;
-import com.social.group.services.RequestService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,15 +34,18 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved object"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public Group getGroup(@PathVariable int id) {
+    public Group getGroup(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int id) {
         return groupService.getGroup(id);
     }
+
     @PostMapping
     @ApiOperation(value = "Create new group")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully added object"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"), })
-    public ResponseEntity<Object> addNewGroup(@RequestBody Group group) {
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),})
+    public ResponseEntity<Object> addNewGroup(
+            @ApiParam(value = "Group object to create", required = true) @RequestBody Group group) {
         return new ResponseEntity<>(groupService.addNewGroup(group) ? HttpStatus.CREATED : HttpStatus.NOT_ACCEPTABLE);
     }
 
@@ -55,7 +54,8 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public List<Group> searchForGroups(@PathVariable String query) {
+    public List<Group> searchForGroups(
+            @ApiParam(value = "Search query", required = true) @PathVariable String query) {
         return groupService.searchForGroups(query);
     }
 
@@ -64,7 +64,9 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully deleted object"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> deleteGroup(@PathVariable int groupId, @PathVariable int userId) {
+    public ResponseEntity<Object> deleteGroup(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int groupId,
+            @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int userId) {
         return new ResponseEntity<>(groupService.deleteGroup(groupId, userId) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
@@ -73,7 +75,9 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully updated object"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> renameGroup(@PathVariable int id, @RequestBody String newName) {
+    public ResponseEntity<Object> renameGroup(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
+            @ApiParam(value = "New name to assign to the group", required = true) @RequestBody String newName) {
         return new ResponseEntity<>(groupService.renameGroup(id, newName) ? HttpStatus.ACCEPTED : HttpStatus.NOT_ACCEPTABLE);
     }
 
@@ -82,7 +86,9 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully updated object"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> changeGroupDescription(@PathVariable int id, @RequestBody String newDescription) {
+    public ResponseEntity<Object> changeGroupDescription(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
+            @ApiParam(value = "New description for group", required = true) @RequestBody String newDescription) {
         return new ResponseEntity<>(groupService.changeGroupDescription(id, newDescription) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
@@ -92,7 +98,9 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Successfully updated object"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> addNewMembersToGroup(@PathVariable int id, @RequestBody List<Integer> userIds) {
+    public ResponseEntity<Object> addNewMembersToGroup(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
+            @ApiParam(value = "List of user ids of users to add") @RequestBody List<Integer> userIds) {
         return new ResponseEntity<>(groupService.addNewMembersToGroup(id, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
@@ -101,7 +109,10 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Successfully updated object"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> removeMembersFromGroup(@PathVariable int id, @PathVariable int removerId, @RequestBody List<Integer> userIds) {
+    public ResponseEntity<Object> removeMembersFromGroup(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
+            @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int removerId,
+            @ApiParam(value = "List of user ids of users to remove") @RequestBody List<Integer> userIds) {
         return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
@@ -113,7 +124,8 @@ public class GroupController {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
 
-    public List<Group> getUserGroups(@PathVariable int id) {
+    public List<Group> getUserGroups(
+            @ApiParam(value = "Id of user") @PathVariable int id) {
         return groupService.getUserGroups(id);
     }
 
@@ -122,7 +134,9 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully updated list"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public void activateOrDeactivateGroupsOfUser(@PathVariable int userId, @PathVariable boolean activate) {
+    public void activateOrDeactivateGroupsOfUser(
+            @ApiParam(value = "Id of user") @PathVariable int userId,
+            @ApiParam(value = "Boolean value indicating whether to activate or deactivate") @PathVariable boolean activate) {
         groupService.activateOrDeactivateGroupsOfUser(userId, activate);
     }
 }
