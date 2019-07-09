@@ -47,7 +47,7 @@ public class RequestService {
         } else throw (new  IllegalAccessException("Not authorized to perform this action"));
     }
 
-    public boolean acceptRequest(int request_id, int userId) throws IllegalAccessException {
+    private boolean acceptRequest(int request_id, int userId) throws IllegalAccessException {
         Optional<Request> requestOptional = requestRepository.findById(request_id);
 
         if (requestOptional.isPresent()) {
@@ -73,8 +73,11 @@ public class RequestService {
             throw (new EntityNotFoundException("Request to join not found"));
         }
     }
+    public boolean acceptOrDeclineRequest( int requestId, int userId, boolean accept) throws IllegalAccessException {
+        return accept? acceptRequest(requestId, userId): declineRequest(requestId, userId);
+    }
 
-    public boolean declineRequest(int request_id, int userId) throws IllegalAccessException {
+    private boolean declineRequest(int request_id, int userId) throws IllegalAccessException {
 
         Optional<Request> requestOptional = requestRepository.findById(request_id);
         if (requestOptional.isPresent()) {

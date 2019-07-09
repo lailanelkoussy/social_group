@@ -19,7 +19,7 @@ public class RequestController {
     @Autowired
     RequestService requestService;
 
-    @GetMapping(value = "/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{groupId}/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "View join requests to a group")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
@@ -28,41 +28,30 @@ public class RequestController {
             @ApiParam(value = "Id of group", required = true)
             @PathVariable int groupId,
             @ApiParam(value = "Id of user performing this request", required = true)
-            @RequestBody int userId) throws IllegalAccessException {
+            @PathVariable int userId) throws IllegalAccessException {
         return requestService.viewRequests(groupId, userId);
     }
 
-    @PatchMapping(value = "/{userId}/{requestId}")
-    @ApiOperation(value = "Accept join request to a group")
-    @ApiResponses(value = {
-            @ApiResponse(code = 202, message = "Successfully accepted request"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"), })
-    public ResponseEntity<Object> acceptRequest(
-            @ApiParam(value = "Id of request", required = true)
-            @PathVariable int requestId,
-            @ApiParam(value = "Id of user performing this request", required = true)
-            @PathVariable int userId) throws IllegalAccessException {
-        return new ResponseEntity<>(requestService.acceptRequest(requestId, userId) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
-    }
 
-    @DeleteMapping(value = "/{userId}/{requestId}/")
-    @ApiOperation(value = "Decline join request to group")
+    @DeleteMapping(value = "/{userId}/{requestId}/{accept}")
+    @ApiOperation(value = "Accept or decline join request to group")
     @ApiResponses(value = {
-            @ApiResponse(code = 202, message = "Successfully declined request"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"), })
+            @ApiResponse(code = 202, message = "Successfully accepted or declined request"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),})
     public ResponseEntity<Object> declineRequest(
             @ApiParam(value = "Id of request", required = true)
             @PathVariable int requestId,
             @ApiParam(value = "Id of user performing this request", required = true)
-            @PathVariable int userId) throws IllegalAccessException {
-        return new ResponseEntity<>(requestService.declineRequest(requestId, userId) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
+            @PathVariable int userId,
+            @ApiParam(value = "boolean indicating whether to accept or decline", required = true) @PathVariable boolean accept) throws IllegalAccessException {
+        return new ResponseEntity<>(requestService.acceptOrDeclineRequest(requestId, userId, accept) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping(value = "/{groupId}/requests/{userId}")
     @ApiOperation(value = "Send join request to group")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully sent request"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"), })
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),})
     public void sendRequest(
             @ApiParam(value = "Id of group", required = true)
             @PathVariable int groupId,

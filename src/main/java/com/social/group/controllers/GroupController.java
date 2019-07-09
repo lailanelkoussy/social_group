@@ -84,7 +84,7 @@ public class GroupController {
     }
 
     @GetMapping(value = "/user/{id}/ids", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Get a user's groups")
+    @ApiOperation(value = "Get a user's group ids")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
@@ -105,7 +105,7 @@ public class GroupController {
         return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
     }
 
-    @PatchMapping(value = "/user/{userId}/{activate}")
+    @PatchMapping(value = "/all/user/{userId}/activate/{activate}")
     @ApiOperation(value = "Activate or deactivate groups created by a user")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully updated list"),
