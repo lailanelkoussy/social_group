@@ -35,7 +35,7 @@ public class RequestController {
     @PatchMapping(value = "/{userId}/{requestId}")
     @ApiOperation(value = "Accept join request to a group")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successfully accepted request"),
+            @ApiResponse(code = 202, message = "Successfully accepted request"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"), })
     public ResponseEntity<Object> acceptRequest(
             @ApiParam(value = "Id of request", required = true)
@@ -48,7 +48,7 @@ public class RequestController {
     @DeleteMapping(value = "/{userId}/{requestId}/")
     @ApiOperation(value = "Decline join request to group")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successfully declined request"),
+            @ApiResponse(code = 202, message = "Successfully declined request"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"), })
     public ResponseEntity<Object> declineRequest(
             @ApiParam(value = "Id of request", required = true)

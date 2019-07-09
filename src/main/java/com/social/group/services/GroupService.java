@@ -1,5 +1,6 @@
 package com.social.group.services;
 
+import com.social.group.dtos.GroupDTO;
 import com.social.group.entities.Group;
 import com.social.group.entities.GroupMember;
 import com.social.group.entities.GroupMemberCK;
@@ -158,11 +159,11 @@ public class GroupService {
 
         } else {
             log.error("Group not found");
-            throw( new EntityNotFoundException("Group not found"));
+            throw (new EntityNotFoundException("Group not found"));
         }
     }
 
-    public boolean renameGroup(int groupId, String newName) {
+    private boolean renameGroup(int groupId, String newName) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         if (groupOptional.isPresent()) {
@@ -181,7 +182,7 @@ public class GroupService {
         }
     }
 
-    public boolean changeGroupDescription(int groupId, String newDescription) {
+    private boolean changeGroupDescription(int groupId, String newDescription) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         if (groupOptional.isPresent()) {
@@ -221,9 +222,68 @@ public class GroupService {
         groupRepository.saveAll(groups);
     }
 
+    private void activateOrDeactivateGroup(int groupId, boolean activate) {
+        Optional<Group> groupOptional = groupRepository.findById(groupId);
+
+        if (groupOptional.isPresent()) {
+            Group group = groupOptional.get();
+            group.setActive(activate);
+            groupRepository.save(group);
+
+        } else {
+            log.error("Group not found");
+            throw (new EntityNotFoundException("Group not found"));
+        }
+    }
+
+    public void patchService(int userId, int groupId, GroupDTO groupDTO) throws IllegalAccessException {
+
+        Optional<Group> groupOptional = groupRepository.findById(groupId);
+
+        if (groupOptional.isPresent()) {
+            Group group = groupOptional.get();
+            if (group.getCreatorId() == userId) {
+
+                //renaming option
+                if (groupDTO.getName() != null)
+                    renameGroup(groupId, groupDTO.getName());
+
+                //adding members
+                if (groupDTO.getGroupMembersIds() != null)
+                    addNewMembersToGroup(groupId, groupDTO.getGroupMembersIds());
+
+                //changing description
+                if (groupDTO.getDescription() != null)
+                    changeGroupDescription(groupId, groupDTO.getDescription());
+
+                //activating or deactivating groups
+                if (groupDTO.getActivate() != -1)
+                    activateOrDeactivateGroup(groupId, groupDTO.getActivate() != 0);
+
+
+            } else {
+                log.error("Not authorized to perform this action");
+                throw (new IllegalAccessException("Not authorized to perform this action"));
+            }
+
+        } else {
+            log.error("Group not found");
+            throw (new EntityNotFoundException("Group not found"));
+        }
+    }
+
     private boolean noNameConflict(String groupName) {
         return (groupRepository.countAllByName(groupName) == 0);
     }
 
+    private boolean isCreatorOrMember(int userId, Group group) {
 
+        if (group.getCreatorId() == userId)
+            return true;
+
+        for (GroupMember groupMember : group.getMembers())
+            if (groupMember.getCompositeKey().getUserId() == userId)
+                return true;
+        return false;
+    }
 }

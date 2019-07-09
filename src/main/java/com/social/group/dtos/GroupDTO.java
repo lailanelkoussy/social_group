@@ -2,6 +2,8 @@ package com.social.group.dtos;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class GroupDTO {
 
@@ -13,6 +15,8 @@ public class GroupDTO {
 
     int creatorId;
 
-    boolean active;
+    int activate = -1;
+
+    List<Integer> groupMembersIds;
 
 }

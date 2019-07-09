@@ -1,5 +1,6 @@
 package com.social.group.controllers;
 
+import com.social.group.dtos.GroupDTO;
 import com.social.group.entities.Group;
 import com.social.group.services.GroupService;
 import io.swagger.annotations.*;
@@ -71,52 +72,6 @@ public class GroupController {
         return new ResponseEntity<>(groupService.deleteGroup(groupId, userId) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
-    @PatchMapping(value = "/{id}/name", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Rename group")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully updated object"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> renameGroup(
-            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
-            @ApiParam(value = "New name to assign to the group", required = true) @RequestBody String newName) {
-        return new ResponseEntity<>(groupService.renameGroup(id, newName) ? HttpStatus.ACCEPTED : HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    @PatchMapping(value = "/{id}/description")
-    @ApiOperation(value = "Change group description")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully updated object"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> changeGroupDescription(
-            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
-            @ApiParam(value = "New description for group", required = true) @RequestBody String newDescription) {
-        return new ResponseEntity<>(groupService.changeGroupDescription(id, newDescription) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
-    }
-
-    //Members
-    @PatchMapping(value = "/{id}/members")
-    @ApiOperation(value = "Add new members to a group")
-    @ApiResponses(value = {
-            @ApiResponse(code = 202, message = "Successfully updated object"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> addNewMembersToGroup(
-            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
-            @ApiParam(value = "List of user ids of users to add") @RequestBody List<Integer> userIds) {
-        return new ResponseEntity<>(groupService.addNewMembersToGroup(id, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
-    }
-
-    @PatchMapping(value = "/{id}/{removerId}/members/remove")
-    @ApiOperation(value = "Remove members from group")
-    @ApiResponses(value = {
-            @ApiResponse(code = 202, message = "Successfully updated object"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
-    public ResponseEntity<Object> removeMembersFromGroup(
-            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
-            @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int removerId,
-            @ApiParam(value = "List of user ids of users to remove") @RequestBody List<Integer> userIds) throws IllegalAccessException {
-        return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
-    }
-
     //User
     @GetMapping(value = "/user/{id}/", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get a user's groups")
@@ -138,6 +93,18 @@ public class GroupController {
         return groupService.getUserGroupIds(id);
     }
 
+    @DeleteMapping(value = "/{id}/{removerId}/members/remove")
+    @ApiOperation(value = "Remove members from group")
+    @ApiResponses(value = {
+            @ApiResponse(code = 202, message = "Successfully updated object"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
+    public ResponseEntity<Object> removeMembersFromGroup(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int id,
+            @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int removerId,
+            @ApiParam(value = "List of user ids of users to remove") @RequestBody List<Integer> userIds) throws IllegalAccessException {
+        return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
+    }
+
     @PatchMapping(value = "/user/{userId}/{activate}")
     @ApiOperation(value = "Activate or deactivate groups created by a user")
     @ApiResponses(value = {
@@ -148,4 +115,18 @@ public class GroupController {
             @ApiParam(value = "Boolean value indicating whether to activate or deactivate") @PathVariable boolean activate) {
         groupService.activateOrDeactivateGroupsOfUser(userId, activate);
     }
+
+    @PatchMapping(value = "/{groupId}/user/{userId}")
+    @ApiOperation(value = "Rename group, change description, add members, or activate/deactivate group")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved list"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
+            @ApiResponse(code = 406, message = "Not authorized to perform this action")})
+    public void patchService(
+            @ApiParam(value = "Id of group", required = true) @PathVariable int groupId,
+            @ApiParam(value = "Id of user performing those actions")@PathVariable int userId,
+            @ApiParam(value = "Group object containing only relevant field changes")@RequestBody GroupDTO groupDTO) throws IllegalAccessException {
+        groupService.patchService(userId, groupId, groupDTO);
+    }
+
 }
