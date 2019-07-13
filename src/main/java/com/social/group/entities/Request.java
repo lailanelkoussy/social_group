@@ -20,7 +20,7 @@ public class Request {
     @Column(name = "request_id")
     int requestId;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id") //todo please make the entity classes and the tables matched, shouldn't this be not null?
     int userId;
 
     @JsonIgnore

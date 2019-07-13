@@ -10,7 +10,7 @@ import java.util.Set;
 @Entity
 @Data
 @Table(name = "group_")
-public class Group {
+public class Group {//todo please make sure that the entity class is a reflection for the table creation (in constraints)
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class Group {
         requests = new HashSet<>();
     }
 
-
+//todo why are you leaving all these useless lines ? :(
 
 
 }

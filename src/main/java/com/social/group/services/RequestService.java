@@ -28,7 +28,7 @@ public class RequestService {
         if (!requestAlreadyExists(groupId, userId)) {
 
             Group group = groupService.getGroup(groupId);
-            Set<Request> requestList = group.getRequests();
+            Set<Request> requestList = group.getRequests(); //todo this is a very HEAVY operation, you should just create a new request and save it, that's it !
             Request request = new Request(userId,group);
 
             requestList.add(request);
@@ -111,7 +111,7 @@ public class RequestService {
     }
 
     private boolean requestAlreadyExists(int groupId, int userId) {
-        return (requestRepository.countAllByUserIdAndGroupId(userId, groupId) != 0);
+        return (requestRepository.countAllByUserIdAndGroupId(userId, groupId) != 0); // todo why not find all by ?
 
     }
 }

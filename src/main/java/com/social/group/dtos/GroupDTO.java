@@ -9,7 +9,7 @@ public class GroupDTO {
 
     int id;
 
-    String name;
+    String name; //todo why are you adding all these new lines ? you can group the members of the same type together
 
     String description;
 

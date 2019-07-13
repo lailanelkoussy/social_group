@@ -10,14 +10,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-public class SwaggerConfigs {
+public class SwaggerConfigs { //todo this should be in configs package, the other one should be in beans package
     @Bean
     public Docket swagger() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.social.group.controllers"))
                 .paths(PathSelectors.any())
-                .build()
+                .build()//todo please add api info too
                 .useDefaultResponseMessages(false);
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class GroupMemberService {
+public class GroupMemberService { //todo didn't we agree that there should be no service for the middle table ?
 
     @Autowired
     GroupMemberRepository groupMemberRepository;

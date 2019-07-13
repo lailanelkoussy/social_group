@@ -7,3 +7,5 @@ CREATE TABLE request
     PRIMARY KEY (request_id),
     FOREIGN KEY (group_id) REFERENCES group_(group_id)
 );
+
+-- todo please don't forget to give names for the constraints, it helps later on when we need to modify/drop them
