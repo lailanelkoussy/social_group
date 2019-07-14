@@ -59,6 +59,4 @@ public class RequestController {
             @PathVariable int userId) {
         requestService.sendRequest(groupId, userId);
     }
-
-
 }

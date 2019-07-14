@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @NoArgsConstructor
@@ -20,12 +21,14 @@ public class Request {
     @Column(name = "request_id")
     int requestId;
 
-    @Column(name = "user_id") //todo please make the entity classes and the tables matched, shouldn't this be not null?
+    @Column(name = "user_id")
+    @NotNull
     int userId;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "group_id")
+    @NotNull
     Group group;
 
     public Request(int userId, Group group) {

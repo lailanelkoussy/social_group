@@ -4,24 +4,21 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 @Data
 @Table(name = "group_")
-public class Group {//todo please make sure that the entity class is a reflection for the table creation (in constraints)
+public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_id")
     int id;
+    int creatorId;
 
     String name;
-
     String description;
-
-    int creatorId;
 
     boolean active;
 
@@ -35,8 +32,5 @@ public class Group {//todo please make sure that the entity class is a reflectio
         members = new HashSet<>();
         requests = new HashSet<>();
     }
-
-//todo why are you leaving all these useless lines ? :(
-
 
 }

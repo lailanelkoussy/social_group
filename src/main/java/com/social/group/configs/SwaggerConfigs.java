@@ -10,7 +10,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-public class SwaggerConfigs { //todo this should be in configs package, the other one should be in beans package
+public class SwaggerConfigs {
     @Bean
     public Docket swagger() {
         return new Docket(DocumentationType.SWAGGER_2)

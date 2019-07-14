@@ -30,32 +30,37 @@ public class GroupService {
     RequestService requestService;
 
     public List<Group> getAllGroups() {
+        log.info("Retrieving all groups");
         return groupRepository.findAll();
     }
 
     public Group getGroup(int groupId) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
+        log.info("Retrieving group...");
 
         if (groupOptional.isPresent()) {
-
+            log.info("Group retrieved");
             return groupOptional.get();
 
         } else {
             log.error("Group not found");
             throw (new EntityNotFoundException("Group not found"));
         }
-
     }
 
     public List<Group> searchForGroups(String query) {
+        log.info("Searching for groups");
         return groupRepository.findAllByNameContainingIgnoreCase(query);
     }
 
     public boolean addNewGroup(Group group) {
-        if (noNameConflict(group.getName())) {
-            groupRepository.save(group);
-            int groupId = groupRepository.save(group).getId();
+        log.info("Checking for group name conflicts");
 
+        if (noNameConflict(group.getName())) {
+            log.info("There is no group name conflicts");
+            groupRepository.save(group);
+            log.info("Saving group...");
+            int groupId = groupRepository.save(group).getId();
             GroupMember groupMember = new GroupMember();
             GroupMemberCK groupMemberCK = new GroupMemberCK();
             groupMemberCK.setUserId(group.getCreatorId());
@@ -76,9 +81,11 @@ public class GroupService {
 
     public boolean deleteGroup(int groupId, int userId) throws IllegalAccessException {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
-
+        log.info("Retrieving group...");
         if (groupOptional.isPresent()) {
+            log.info("Group retrieved");
             Group group = groupOptional.get();
+            log.info("Deleting group...");
             if (group.getCreatorId() == userId) {
                 Set<Request> requests = group.getRequests();
                 requestService.deleteRequests(requests);
@@ -97,16 +104,20 @@ public class GroupService {
     }
 
     public void updateGroup(Group group) {
+        log.info("Updating group...");
         groupRepository.save(group);
     }
 
     public boolean addNewMembersToGroup(int group_id, List<Integer> userIds) {
         Optional<Group> groupOptional = groupRepository.findById(group_id);
+        log.info("Retrieving group...");
 
         if (groupOptional.isPresent()) {
+            log.info("Group retrieved");
             Group group = groupOptional.get();
             Set<GroupMember> groupMembers = group.getMembers();
 
+            log.info("Adding new members to group");
             for (int userId : userIds) {
                 GroupMemberCK compositeKey = new GroupMemberCK();
                 compositeKey.setGroup(group);
@@ -125,18 +136,20 @@ public class GroupService {
             log.error("Group not found");
             return false;
         }
-
         return true;
     }
 
     public boolean removeGroupMembersFromGroup(int groupId, int removerId, List<Integer> userIds) throws IllegalAccessException {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
+        log.info("Retrieving group...");
         if (groupOptional.isPresent()) {
+            log.info("Group retrieved");
             Group group = groupOptional.get();
             if (group.getCreatorId() == removerId) {
                 Set<GroupMember> groupMembers = group.getMembers();
 
+                log.info("Removing groups");
                 for (int userId : userIds) {
                     if (userId == group.getCreatorId()) {
                         log.warn("You cannot remove creator from their group");
@@ -166,9 +179,12 @@ public class GroupService {
     private boolean renameGroup(int groupId, String newName) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
+        log.info("Retrieving group");
         if (groupOptional.isPresent()) {
             Group group = groupOptional.get();
+            log.info("Checking for name conflict");
             if (noNameConflict(newName)) {
+                log.info("Creating group");
                 group.setName(newName);
                 groupRepository.save(group);
                 return true;
@@ -184,12 +200,13 @@ public class GroupService {
 
     private boolean changeGroupDescription(int groupId, String newDescription) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
-
+        log.info("Retrieving group");
         if (groupOptional.isPresent()) {
-
+            log.info("Group retrieved");
             Group group = groupOptional.get();
             group.setDescription(newDescription);
             groupRepository.save(group);
+            log.info("Updating group");
             return true;
 
         } else {
@@ -200,10 +217,12 @@ public class GroupService {
     }
 
     public List<Group> getUserGroups(int userId) {
+        log.info("Getting groups");
         return groupMemberService.getGroupsWithUser(userId);
     }
 
     public List<Integer> getUserGroupIds(int userId) {
+
         List<Group> groups = getUserGroups(userId);
         List<Integer> groupIds = new ArrayList<>();
 
@@ -215,7 +234,7 @@ public class GroupService {
 
     public void activateOrDeactivateGroupsOfUser(int user_id, boolean activate) {
         List<Group> groups = getUserGroups(user_id);
-
+        log.info("Retrieving groups..");
         for (Group group : groups) {
             group.setActive(activate);
         }
@@ -224,10 +243,13 @@ public class GroupService {
 
     private void activateOrDeactivateGroup(int groupId, boolean activate) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
+        log.info("Retrieving group...");
 
         if (groupOptional.isPresent()) {
+            log.info("Group found");
             Group group = groupOptional.get();
             group.setActive(activate);
+            log.info("Updating group");
             groupRepository.save(group);
 
         } else {
@@ -239,8 +261,10 @@ public class GroupService {
     public void patchService(int userId, int groupId, GroupDTO groupDTO) throws IllegalAccessException {
 
         Optional<Group> groupOptional = groupRepository.findById(groupId);
+        log.info("Retrieving group...");
 
         if (groupOptional.isPresent()) {
+            log.info("Group retrieved");
             Group group = groupOptional.get();
             if (group.getCreatorId() == userId) {
 
@@ -276,14 +300,4 @@ public class GroupService {
         return (groupRepository.countAllByName(groupName) == 0);
     }
 
-    private boolean isCreatorOrMember(int userId, Group group) {
-
-        if (group.getCreatorId() == userId)
-            return true;
-
-        for (GroupMember groupMember : group.getMembers())
-            if (groupMember.getCompositeKey().getUserId() == userId)
-                return true;
-        return false;
-    }
 }
