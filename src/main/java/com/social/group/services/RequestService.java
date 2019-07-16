@@ -28,12 +28,9 @@ public class RequestService {
         if (!requestAlreadyExists(groupId, userId)) {
             log.info("Sending request...");
             Group group = groupService.getGroup(groupId);
-            Set<Request> requestList = group.getRequests(); //todo this is a very HEAVY operation, you should just create a new request and save it, that's it !
             Request request = new Request(userId, group);
 
-            requestList.add(request);
             requestRepository.save(request);
-            groupService.updateGroup(group);
         }
     }
 

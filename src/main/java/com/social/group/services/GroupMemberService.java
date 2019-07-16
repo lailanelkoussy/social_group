@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Slf4j
 @Service
-public class GroupMemberService { //todo didn't we agree that there should be no service for the middle table ?
+public class GroupMemberService {
 
     @Autowired
     GroupMemberRepository groupMemberRepository;

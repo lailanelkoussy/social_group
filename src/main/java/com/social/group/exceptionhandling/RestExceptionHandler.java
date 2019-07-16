@@ -27,14 +27,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleEntityNotFound(
             EntityNotFoundException ex) {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+        
     }
 
     @ExceptionHandler(IllegalAccessException.class)
     protected ResponseEntity<Object> handleIllegalAccessException(IllegalAccessException ex) {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
-
+    
 
 
 }
