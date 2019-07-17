@@ -1,5 +1,7 @@
 package com.social.group.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -15,5 +17,15 @@ public class GroupDTO {
     String description;
 
     List<Integer> groupMembersIds;
+
+    @JsonIgnore
+    public void setId(int id){
+        this.id = id;
+    }
+
+    @JsonProperty
+    public int getId(){
+        return id;
+    }
 
 }

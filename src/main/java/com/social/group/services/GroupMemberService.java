@@ -7,18 +7,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
 @Service
 public class GroupMemberService {
-
     @Autowired
     GroupMemberRepository groupMemberRepository;
 
-    public List<Group> getGroupsWithUser(int user_id) {
+    List<Group> getGroupsWithUser(int user_id) {
 
         log.info("Retrieving groups...");
         List<GroupMember> groupMembers = groupMemberRepository.findAllByCompositeKey_UserId(user_id);
@@ -31,18 +32,21 @@ public class GroupMemberService {
         return groups;
     }
 
-
-    public GroupMember getGroupMember(int groupId, int userId) {
+    GroupMember getGroupMember(int groupId, int userId) {
         log.info("Retrieving group member...");
-        return groupMemberRepository.findByCompositeKey_GroupIdAndCompositeKey_UserId(groupId, userId);
+
+        Optional<GroupMember> groupMemberOptional = groupMemberRepository.findByCompositeKey_GroupIdAndCompositeKey_UserId(groupId, userId);
+        if(!groupMemberOptional.isPresent())
+            throw (new EntityNotFoundException("User is not member of group"));
+        return groupMemberOptional.get();
     }
 
-    public void addGroupMembers(Set<GroupMember> groupMembers) {
+    void addGroupMembers(Set<GroupMember> groupMembers) {
         log.info("Adding group members");
         groupMemberRepository.saveAll(groupMembers);
     }
 
-    public void removeGroupMembers(Set<GroupMember> groupMembers) {
+    void removeGroupMembers(Set<GroupMember> groupMembers) {
         log.info("Deleting group members");
         groupMemberRepository.deleteAll(groupMembers);
     }

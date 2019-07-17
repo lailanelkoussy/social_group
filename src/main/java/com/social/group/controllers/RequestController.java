@@ -44,7 +44,8 @@ public class RequestController {
             @ApiParam(value = "Id of user performing this request", required = true)
             @PathVariable int userId,
             @ApiParam(value = "boolean indicating whether to accept or decline", required = true) @PathVariable boolean accept) throws IllegalAccessException {
-        return new ResponseEntity<>(requestService.acceptOrDeclineRequest(requestId, userId, accept) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
+        requestService.acceptOrDeclineRequest(requestId, userId, accept);
+        return new ResponseEntity<>( HttpStatus.ACCEPTED);
     }
 
     @PostMapping(value = "/{groupId}/requests/{userId}")

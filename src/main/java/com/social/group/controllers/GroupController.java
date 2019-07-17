@@ -1,6 +1,8 @@
 package com.social.group.controllers;
 
 import com.social.group.dtos.GroupDTO;
+import com.social.group.dtos.GroupPatchDTO;
+import com.social.group.dtos.RemoveGroupDTO;
 import com.social.group.entities.Group;
 import com.social.group.services.GroupService;
 import io.swagger.annotations.*;
@@ -10,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.InvalidClassException;
 import java.util.List;
 
 @RestController
@@ -45,10 +48,11 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully added object"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 400, message = "Invalid group object")})
+            @ApiResponse(code = 406, message = "Invalid group object")})
     public ResponseEntity<Object> addNewGroup(
-            @ApiParam(value = "Group object to create", required = true) @RequestBody Group group) {
-        return new ResponseEntity<>(groupService.addNewGroup(group) ? HttpStatus.CREATED : HttpStatus.NOT_ACCEPTABLE);
+            @ApiParam(value = "Group object to create", required = true) @RequestBody Group group) throws InvalidClassException {
+        groupService.addNewGroup(group);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/search/{query}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,11 +69,13 @@ public class GroupController {
     @ApiOperation(value = "Delete group")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully deleted object"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")})
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
+            @ApiResponse(code = 406, message = "Invalid group object")})
     public ResponseEntity<Object> deleteGroup(
             @ApiParam(value = "Id of group", required = true) @PathVariable int groupId,
             @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int userId) throws IllegalAccessException {
-        return new ResponseEntity<>(groupService.deleteGroup(groupId, userId) ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+        groupService.deleteGroup(groupId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //User
@@ -101,8 +107,9 @@ public class GroupController {
     public ResponseEntity<Object> removeMembersFromGroup(
             @ApiParam(value = "Id of group", required = true) @PathVariable int id,
             @ApiParam(value = "Id of user performing the action", required = true) @PathVariable int removerId,
-            @ApiParam(value = "List of user ids of users to remove") @RequestBody List<Integer> userIds) throws IllegalAccessException {
-        return new ResponseEntity<>(groupService.removeGroupMembersFromGroup(id, removerId, userIds) ? HttpStatus.ACCEPTED : HttpStatus.BAD_REQUEST);
+            @ApiParam(value = "List of user ids of users to remove") @RequestBody RemoveGroupDTO removeGroupDTO) throws IllegalAccessException {
+        groupService.removeGroupMembersFromGroup(id, removerId, removeGroupDTO.getRemove());
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @PatchMapping(value = "/all/user/{userId}/activate/{activate}")
@@ -121,11 +128,12 @@ public class GroupController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 406, message = "Not authorized to perform this action")})
+            @ApiResponse(code = 403, message = "Not authorized to perform this action"),
+            @ApiResponse(code = 406, message = "Invalid group object")})
     public void patchService(
             @ApiParam(value = "Id of group", required = true) @PathVariable int groupId,
-            @ApiParam(value = "Id of user performing those actions")@PathVariable int userId,
-            @ApiParam(value = "Group object containing only relevant field changes")@RequestBody GroupDTO groupDTO) throws IllegalAccessException {
+            @ApiParam(value = "Id of user performing those actions") @PathVariable int userId,
+            @ApiParam(value = "Group object containing only relevant field changes") @RequestBody GroupPatchDTO groupDTO) throws IllegalAccessException, InvalidClassException {
         groupService.patchService(userId, groupId, groupDTO);
     }
 

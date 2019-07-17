@@ -29,7 +29,6 @@ public class RequestService {
             log.info("Sending request...");
             Group group = groupService.getGroup(groupId);
             Request request = new Request(userId, group);
-
             requestRepository.save(request);
         }
     }
@@ -45,7 +44,7 @@ public class RequestService {
         } else throw (new IllegalAccessException("Not authorized to perform this action"));
     }
 
-    private boolean acceptRequest(int request_id, int userId) throws IllegalAccessException {
+    private void acceptRequest(int request_id, int userId) throws IllegalAccessException {
         Optional<Request> requestOptional = requestRepository.findById(request_id);
         log.info("Retrieving request...");
 
@@ -60,7 +59,7 @@ public class RequestService {
                 groupService.addNewMembersToGroup(group.getId(), userIdList);
                 requestRepository.deleteById(request_id);
                 log.info("Request accepted");
-                return true;
+
 
             } else {
                 log.error("Not allowed to perform this action");
@@ -72,11 +71,15 @@ public class RequestService {
         }
     }
 
-    public boolean acceptOrDeclineRequest(int requestId, int userId, boolean accept) throws IllegalAccessException {
-        return accept ? acceptRequest(requestId, userId) : declineRequest(requestId, userId);
+    public void acceptOrDeclineRequest(int requestId, int userId, boolean accept) throws IllegalAccessException {
+        if (accept) {
+            acceptRequest(requestId, userId);
+        } else {
+            declineRequest(requestId, userId);
+        }
     }
 
-    private boolean declineRequest(int request_id, int userId) throws IllegalAccessException {
+    private void declineRequest(int request_id, int userId) throws IllegalAccessException {
 
         Optional<Request> requestOptional = requestRepository.findById(request_id);
         log.info("Retrieving request...");
@@ -92,7 +95,6 @@ public class RequestService {
                 group.setRequests(requests);
                 groupService.updateGroup(group);
                 log.info("Request declined");
-                return true;
 
             } else {
                 log.error("Not allowed to perform this action");
@@ -105,7 +107,7 @@ public class RequestService {
         }
     }
 
-    public void deleteRequests(Set<Request> requests) {
+     void deleteRequests(Set<Request> requests) {
         requestRepository.deleteAll(requests);
     }
 

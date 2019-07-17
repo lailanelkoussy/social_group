@@ -1,20 +1,21 @@
 package com.social.group.services;
 
 import com.social.group.dtos.GroupDTO;
+import com.social.group.dtos.GroupPatchDTO;
+import com.social.group.dtos.UserDTO;
 import com.social.group.entities.Group;
 import com.social.group.entities.GroupMember;
 import com.social.group.entities.GroupMemberCK;
 import com.social.group.entities.Request;
+import com.social.group.proxies.UserServiceProxy;
 import com.social.group.repos.GroupRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.io.InvalidClassException;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -28,6 +29,9 @@ public class GroupService {
 
     @Autowired
     RequestService requestService;
+
+    @Autowired
+    UserServiceProxy userServiceProxy;
 
     public List<Group> getAllGroups() {
         log.info("Retrieving all groups");
@@ -53,7 +57,14 @@ public class GroupService {
         return groupRepository.findAllByNameContainingIgnoreCase(query);
     }
 
-    public boolean addNewGroup(Group group) {
+    public void addNewGroup(Group group) throws InvalidClassException {
+
+        try {
+            userServiceProxy.getUser(group.getCreatorId());
+        } catch (Exception e) {
+            throw new EntityNotFoundException("User not found");
+        }
+
         log.info("Checking for group name conflicts");
 
         if (noNameConflict(group.getName())) {
@@ -71,15 +82,14 @@ public class GroupService {
             creator.add(group.getCreatorId());
             addNewMembersToGroup(groupId, creator);
 
-            return true;
-
         } else {
             log.error("There already exists group with this name");
-            return false;
+            throw (new InvalidClassException("There already exists group with this name"));
         }
     }
 
-    public boolean deleteGroup(int groupId, int userId) throws IllegalAccessException {
+    public void deleteGroup(int groupId, int userId) throws IllegalAccessException {
+
         Optional<Group> groupOptional = groupRepository.findById(groupId);
         log.info("Retrieving group...");
         if (groupOptional.isPresent()) {
@@ -91,34 +101,37 @@ public class GroupService {
                 requestService.deleteRequests(requests);
                 groupMemberService.removeGroupMembers(group.getMembers());
                 groupRepository.delete(group);
-                return true;
             } else {
                 log.error("Not authorized to perform this action");
                 throw (new IllegalAccessException("Not authorized to perform this action"));
             }
-
         } else {
             log.error("Group not found");
             throw (new EntityNotFoundException("Group not found"));
         }
     }
 
-    public void updateGroup(Group group) {
+    void updateGroup(Group group) {
         log.info("Updating group...");
         groupRepository.save(group);
     }
 
-    public boolean addNewMembersToGroup(int group_id, List<Integer> userIds) {
+    void addNewMembersToGroup(int group_id, List<Integer> userIds) {
         Optional<Group> groupOptional = groupRepository.findById(group_id);
         log.info("Retrieving group...");
-
         if (groupOptional.isPresent()) {
+
             log.info("Group retrieved");
             Group group = groupOptional.get();
             Set<GroupMember> groupMembers = group.getMembers();
 
             log.info("Adding new members to group");
             for (int userId : userIds) {
+                try {
+                    userServiceProxy.getUser(userId);
+                } catch (Exception e) {
+                    throw new EntityNotFoundException("Could not find user");
+                }
                 GroupMemberCK compositeKey = new GroupMemberCK();
                 compositeKey.setGroup(group);
                 compositeKey.setUserId(userId);
@@ -134,12 +147,12 @@ public class GroupService {
 
         } else {
             log.error("Group not found");
-            return false;
+            throw (new EntityNotFoundException("Group not found"));
+
         }
-        return true;
     }
 
-    public boolean removeGroupMembersFromGroup(int groupId, int removerId, List<Integer> userIds) throws IllegalAccessException {
+    public void removeGroupMembersFromGroup(int groupId, int removerId, List<Integer> userIds) throws IllegalAccessException {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         log.info("Retrieving group...");
@@ -148,6 +161,7 @@ public class GroupService {
             Group group = groupOptional.get();
             if (group.getCreatorId() == removerId) {
                 Set<GroupMember> groupMembers = group.getMembers();
+                Set<GroupMember> groupMembersToRemove = new HashSet<>();
 
                 log.info("Removing groups");
                 for (int userId : userIds) {
@@ -157,14 +171,14 @@ public class GroupService {
                     } else {
                         GroupMember groupMember = groupMemberService.getGroupMember(groupId, userId);
                         groupMembers.remove(groupMember);
+                        groupMembersToRemove.add(groupMember);
                     }
                 }
                 group.setMembers(groupMembers);
                 groupRepository.save(group);
 
-                groupMemberService.removeGroupMembers(groupMembers);
+                groupMemberService.removeGroupMembers(groupMembersToRemove);
 
-                return true;
             } else {
                 log.error("Not authorized to perform this action.");
                 throw (new IllegalAccessException("Not authorized to perform this action"));
@@ -176,7 +190,7 @@ public class GroupService {
         }
     }
 
-    private boolean renameGroup(int groupId, String newName) {
+    private void renameGroup(int groupId, String newName) throws InvalidClassException {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
 
         log.info("Retrieving group");
@@ -187,18 +201,19 @@ public class GroupService {
                 log.info("Creating group");
                 group.setName(newName);
                 groupRepository.save(group);
-                return true;
+
             } else {
                 log.error("Name already taken by another group");
-                return false;
+                throw (new InvalidClassException("Name already taken by another group"));
+
             }
         } else {
             log.error("Group not found");
-            return false;
+            throw (new EntityNotFoundException("Group not found"));
         }
     }
 
-    private boolean changeGroupDescription(int groupId, String newDescription) {
+    private void changeGroupDescription(int groupId, String newDescription) {
         Optional<Group> groupOptional = groupRepository.findById(groupId);
         log.info("Retrieving group");
         if (groupOptional.isPresent()) {
@@ -207,7 +222,6 @@ public class GroupService {
             group.setDescription(newDescription);
             groupRepository.save(group);
             log.info("Updating group");
-            return true;
 
         } else {
             log.error("Group not found");
@@ -258,7 +272,7 @@ public class GroupService {
         }
     }
 
-    public void patchService(int userId, int groupId, GroupDTO groupDTO) throws IllegalAccessException {
+    public void patchService(int userId, int groupId, GroupPatchDTO groupDTO) throws IllegalAccessException, InvalidClassException {
 
         Optional<Group> groupOptional = groupRepository.findById(groupId);
         log.info("Retrieving group...");
