@@ -51,5 +51,10 @@ public class GroupMemberService {
         groupMemberRepository.deleteAll(groupMembers);
     }
 
+    public void deleteUserMembers(int userId) {
+        groupMemberRepository.deleteAllByCompositeKey_UserId(userId);
+
+    }
+
 
 }

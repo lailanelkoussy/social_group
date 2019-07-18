@@ -1,9 +1,11 @@
 package com.social.group.controllers;
 
+import com.social.group.dtos.CreateGroupDTO;
 import com.social.group.dtos.GroupDTO;
 import com.social.group.dtos.GroupPatchDTO;
 import com.social.group.dtos.RemoveGroupDTO;
 import com.social.group.entities.Group;
+import com.social.group.services.GroupMemberService;
 import com.social.group.services.GroupService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ public class GroupController {
 
     @Autowired
     GroupService groupService;
+
+    @Autowired
+    GroupMemberService groupMemberService;
 
     //Groups
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -50,7 +55,7 @@ public class GroupController {
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
             @ApiResponse(code = 406, message = "Invalid group object")})
     public ResponseEntity<Object> addNewGroup(
-            @ApiParam(value = "Group object to create", required = true) @RequestBody Group group) throws InvalidClassException {
+            @ApiParam(value = "Group object to create", required = true) @RequestBody CreateGroupDTO group) throws InvalidClassException {
         groupService.addNewGroup(group);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -136,5 +141,19 @@ public class GroupController {
             @ApiParam(value = "Group object containing only relevant field changes") @RequestBody GroupPatchDTO groupDTO) throws IllegalAccessException, InvalidClassException {
         groupService.patchService(userId, groupId, groupDTO);
     }
+
+    @ApiOperation(value = "Delete a user's groups and group members")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully deleted requests"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),})
+    @DeleteMapping("/all/user/{userId}")
+    public void deleteUsersGroupsAndMembers(
+            @ApiParam(value = "User's id", required = true)
+            @PathVariable int userId) throws IllegalAccessException {
+        groupService.deleteUsersOwnedGroups(userId);
+        groupMemberService.deleteUserMembers(userId);
+
+    }
+
 
 }

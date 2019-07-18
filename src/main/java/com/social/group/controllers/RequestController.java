@@ -60,4 +60,14 @@ public class RequestController {
             @PathVariable int userId) {
         requestService.sendRequest(groupId, userId);
     }
+
+    @ApiOperation(value = "Delete a user's requests")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully deleted requests"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),})
+    @DeleteMapping("/all/user/{userId}")
+    public void deleteUsersRequests(
+            @PathVariable int userId){
+        requestService.deleteUsersRequests(userId);
+    }
 }

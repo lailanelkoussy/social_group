@@ -15,4 +15,7 @@ public interface UserServiceProxy {
     UserDTO getUser(
             @ApiParam(value = "Id of user", required = true) @PathVariable int id);
 
+
+
+
 }

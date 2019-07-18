@@ -2,6 +2,7 @@ package com.social.group.services;
 
 import com.social.group.entities.Group;
 import com.social.group.entities.Request;
+import com.social.group.proxies.UserServiceProxy;
 import com.social.group.repos.RequestRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,17 @@ public class RequestService {
     @Autowired
     GroupService groupService;
 
+    @Autowired
+    UserServiceProxy userServiceProxy;
+
     public void sendRequest(int groupId, int userId) {
 
         if (!requestAlreadyExists(groupId, userId)) {
+            try {
+                userServiceProxy.getUser(userId);
+            } catch (Exception e){
+                throw new EntityNotFoundException("User not found");
+            }
             log.info("Sending request...");
             Group group = groupService.getGroup(groupId);
             Request request = new Request(userId, group);
@@ -107,12 +116,16 @@ public class RequestService {
         }
     }
 
-     void deleteRequests(Set<Request> requests) {
+    void deleteRequests(Set<Request> requests) {
         requestRepository.deleteAll(requests);
     }
 
     private boolean requestAlreadyExists(int groupId, int userId) {
         return (requestRepository.countAllByUserIdAndGroupId(userId, groupId) != 0);
 
+    }
+
+    public void deleteUsersRequests(int userId){
+        requestRepository.deleteAllByUserId(userId);
     }
 }

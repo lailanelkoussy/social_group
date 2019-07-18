@@ -1,17 +1,19 @@
 package com.social.group.services;
 
+import com.social.group.dtos.CreateGroupDTO;
 import com.social.group.dtos.GroupDTO;
 import com.social.group.dtos.GroupPatchDTO;
-import com.social.group.dtos.UserDTO;
 import com.social.group.entities.Group;
 import com.social.group.entities.GroupMember;
 import com.social.group.entities.GroupMemberCK;
 import com.social.group.entities.Request;
+import com.social.group.proxies.PhotoServiceProxy;
 import com.social.group.proxies.UserServiceProxy;
 import com.social.group.repos.GroupRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.modelmapper.ModelMapper;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.InvalidClassException;
@@ -32,6 +34,11 @@ public class GroupService {
 
     @Autowired
     UserServiceProxy userServiceProxy;
+
+    @Autowired
+    PhotoServiceProxy photoServiceProxy;
+
+    ModelMapper modelMapper = new ModelMapper();
 
     public List<Group> getAllGroups() {
         log.info("Retrieving all groups");
@@ -57,29 +64,30 @@ public class GroupService {
         return groupRepository.findAllByNameContainingIgnoreCase(query);
     }
 
-    public void addNewGroup(Group group) throws InvalidClassException {
+    public void addNewGroup(CreateGroupDTO groupDTO) throws InvalidClassException {
 
         try {
-            userServiceProxy.getUser(group.getCreatorId());
+            userServiceProxy.getUser(groupDTO.getCreatorId());
         } catch (Exception e) {
             throw new EntityNotFoundException("User not found");
         }
 
         log.info("Checking for group name conflicts");
 
-        if (noNameConflict(group.getName())) {
+        if (noNameConflict(groupDTO.getName())) {
             log.info("There is no group name conflicts");
-            groupRepository.save(group);
+            Group group = new Group();
+            modelMapper.map(groupDTO, group);
             log.info("Saving group...");
             int groupId = groupRepository.save(group).getId();
             GroupMember groupMember = new GroupMember();
             GroupMemberCK groupMemberCK = new GroupMemberCK();
-            groupMemberCK.setUserId(group.getCreatorId());
+            groupMemberCK.setUserId(groupDTO.getCreatorId());
             groupMemberCK.setGroup(group);
             groupMember.setCompositeKey(groupMemberCK);
 
             List<Integer> creator = new ArrayList<>();
-            creator.add(group.getCreatorId());
+            creator.add(groupDTO.getCreatorId());
             addNewMembersToGroup(groupId, creator);
 
         } else {
@@ -101,6 +109,7 @@ public class GroupService {
                 requestService.deleteRequests(requests);
                 groupMemberService.removeGroupMembers(group.getMembers());
                 groupRepository.delete(group);
+                photoServiceProxy.deleteGroupsPhotos(groupId);
             } else {
                 log.error("Not authorized to perform this action");
                 throw (new IllegalAccessException("Not authorized to perform this action"));
@@ -172,6 +181,7 @@ public class GroupService {
                         GroupMember groupMember = groupMemberService.getGroupMember(groupId, userId);
                         groupMembers.remove(groupMember);
                         groupMembersToRemove.add(groupMember);
+                        photoServiceProxy.deleteUsersGroupPhotos(userId, groupId);
                     }
                 }
                 group.setMembers(groupMembers);
@@ -312,6 +322,12 @@ public class GroupService {
 
     private boolean noNameConflict(String groupName) {
         return (groupRepository.countAllByName(groupName) == 0);
+    }
+
+    public void deleteUsersOwnedGroups(int userId) throws IllegalAccessException {
+        List<Group> userGroups = groupRepository.findAllByCreatorId(userId);
+        for (Group group : userGroups)
+            deleteGroup(group.getId(), userId);
     }
 
 }
