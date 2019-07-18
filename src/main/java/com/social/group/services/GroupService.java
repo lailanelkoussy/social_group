@@ -61,7 +61,12 @@ public class GroupService {
 
     public List<Group> searchForGroups(String query) {
         log.info("Searching for groups");
-        return groupRepository.findAllByNameContainingIgnoreCase(query);
+        List<Group> groups = groupRepository.findAllByNameContainingIgnoreCase(query);
+        for (Group group : groups) {
+            if(!group.isActive())
+                groups.remove(group);
+        }
+        return groups;
     }
 
     public void addNewGroup(CreateGroupDTO groupDTO) throws InvalidClassException {
